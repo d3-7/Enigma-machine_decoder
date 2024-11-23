@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <string.h>
+
+#define ALPHABET_SIZE 26
+
+// Define rotor and reflector configurations
+const char *rotors[3][ALPHABET_SIZE] = {
+    "EKMFLGDQVZNTOWYHXUSPAIBRCJ", // Rotor I
+    "AJDKSIRUXBLHWTMCQGZNPYFVOE", // Rotor II
+    "BDFHJLCPRTXVZNYEIWGAKMUSQO"  // Rotor III
+};
+
+const char *reflector = "YRUHQSLDPXNGOKIETZMFOWAVJC";
+
+// Function to encode a single letter (simplified)
+char encode_letter(char letter, int rotor_positions[]) {
+    // Pass through rotors
+    for (int i = 0; i < 3; i++) {
+        letter = rotors[i][(letter - 'A' + rotor_positions[i]) % ALPHABET_SIZE];
+    }
+    // Reflect
+    letter = reflector[letter - 'A'];
+    // Pass back through rotors (reverse logic here)
+    return letter; // Simplified for demonstration
+}
+
+// Function to decode a message and check against a dictionary
+void decode_message(const char *ciphertext, int rotor_positions[], const char *dictionary[], int dict_size) {
+    char decoded_message[strlen(ciphertext) + 1];
+    for (int i = 0; i < strlen(ciphertext); i++) {
+        decoded_message[i] = encode_letter(ciphertext[i], rotor_positions);
+    }
+    decoded_message[strlen(ciphertext)] = '\0'; // Null-terminate the string
+
+    // Check against the dictionary
+    for (int i = 0; i < dict_size; i++) {
+        if (strstr(decoded_message, dictionary[i]) != NULL) {
+            printf("Decoded message: %s (contains word: %s)\n", decoded_message, dictionary[i]);
+            break; // Stop if a valid word is found
+        }
+    }
+}
+
+// Main function
+int main() {
+    const char *ciphertext = "YOUR_CIPHERTEXT_HERE"; // Replace with actual ciphertext
+    int rotor_positions[3] = {0, 0, 0}; // Initial rotor positions
+
+    // Example dictionary
+    const char *dictionary[] = {"HELLO", "WORLD", "ENIGMA", "CRYPTOLOGY"};
+    int dict_size = sizeof(dictionary) / sizeof(dictionary[0]);
+
+    // Targeted brute-force search
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        for (int j = 0; j < ALPHABET_SIZE; j++) {
+            for (int k = 0; k < ALPHABET_SIZE; k++) {
+                rotor_positions[0] = i;
+                rotor_positions[1] = j;
+                rotor_positions[2] = k;
+                decode_message(ciphertext, rotor_positions, dictionary, dict_size);
+            }
+        }
+    }
+
+    return 0;
+}
